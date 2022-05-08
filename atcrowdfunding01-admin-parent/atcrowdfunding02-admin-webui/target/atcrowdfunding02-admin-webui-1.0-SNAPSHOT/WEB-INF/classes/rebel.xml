@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  This is the JRebel configuration file. It maps the running application to your IDE workspace, enabling JRebel reloading for this project.
+  Refer to https://manuals.jrebel.com/jrebel/standalone/config.html for more information.
+-->
+<application generated-by="intellij" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.zeroturnaround.com"
+			 xsi:schemaLocation="http://www.zeroturnaround.com http://update.zeroturnaround.com/jrebel/rebel-2_3.xsd">
+
+	<id>atcrowdfunding02-admin-webui</id>
+
+	<classpath>
+		<dir name="D:/砺锋/第三阶段项目/尚筹网/atcrowdfunding01-admin-parent/atcrowdfunding02-admin-webui/target/classes">
+		</dir>
+	</classpath>
+
+	<web>
+		<link target="/">
+			<dir name="D:/砺锋/第三阶段项目/尚筹网/atcrowdfunding01-admin-parent/atcrowdfunding02-admin-webui/src/main/webapp">
+			</dir>
+		</link>
+	</web>
+
+</application>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--配置自动扫描的包：主要是为了把Service扫描到IOC容器中-->
+    <context:component-scan base-package="net.seehope">
+
+    </context:component-scan>
+
+    <!--开启事务注解支持-->
+    <tx:annotation-driven/>
+    <!--配置事务管理事务管理-->
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+    <!--装配数据源-->
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+
+    <!--配置事务切面-->
+    <aop:config>
+        <!--<aop:pointcut id="txPointCut" expression="execution(public String net.seehope.crowd.service.impl.AdminService.saveAdmin(Admin) )"/>-->
+
+        <!--考虑到后面整合springSecurity，避免把UserDetailService加入事务控制，让切入点表达式定位到ServiceImpl-->
+        <aop:pointcut id="txPointCut" expression="execution(* *..*ServiceImpl.*(..) )"/>
+
+        <!--将切入点表达式和事务通知关联起来-->
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="txPointCut"></aop:advisor>
+    </aop:config>
+
+    <!--配置事务的通知-->
+    <tx:advice id="txAdvice"  transaction-manager="txManager">
+
+        <!--配置事务的属性-->
+        <tx:attributes>
+
+            <!--查询方法：配置只读属性，让数据库知道这是一个查询操作，能够进行一定的优化-->
+            <tx:method name="get*" read-only="true"/>
+            <tx:method name="find*" read-only="true"/>
+            <tx:method name="query" read-only="true"/>
+            <tx:method name="count" read-only="true"/>
+
+            <!--增删改方法：配置事务传播行为、回滚事务-->
+            <!--
+            REQUIRES_NEW:不管线程上面有没有这个事务，我们都在自己开的事务里面运行
+
+            rollback-for：配置事务方法针对什么样的异常回滚
+                默认：运行时异常回滚
+                建议：编译时和运行时异常都回滚
+            -->
+            <tx:method name="save*" propagation="REQUIRES_NEW" rollback-for="java.lang.Exception"/>
+            <tx:method name="update*" propagation="REQUIRES_NEW" rollback-for="java.lang.Exception"/>
+            <tx:method name="delete*" propagation="REQUIRES_NEW" rollback-for="java.lang.Exception"/>
+            <tx:method name="batch*" propagation="REQUIRES_NEW" rollback-for="java.lang.Exception"/>
+
+
+        </tx:attributes>
+
+    </tx:advice>
+
+    <bean id="objectMapper" class="com.fasterxml.jackson.databind.ObjectMapper">
+    </bean>
+
+    <bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"></bean>
+
+</beans>

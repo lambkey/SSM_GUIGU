@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--开启静态资源文件访问支持  webapp下面的静态资源也可以访问
+        如果此功能没有开启 webapp下面的静态资源要通过具体的mvc代理才可以访问
+    -->
+
+
+    <!--开MVC 注解支持-->
+    <mvc:annotation-driven></mvc:annotation-driven>
+
+    <!--开启注解扫描:扫描Handler-->
+    <context:component-scan base-package="net.seehope.crowd.mvc">
+
+    </context:component-scan>
+
+    <!--配置试图,只有控制器才可以访问WEB-INF目录下面的东西-->
+    <bean  class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/"></property>
+        <property name="suffix" value=".jsp"></property>
+    </bean>
+
+    <!--配置基于xml的异常映射-->
+    <bean id="simpleMappingExceptionResolver" class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <!--配置异常类型和具体视图页面的对应关系-->
+        <property name="exceptionMappings" >
+            <props>
+                <!--key属性指定异常全类名-->
+                <prop key="java.lang.Exception">system-error</prop>
+            </props>
+        </property>
+    </bean>
+
+
+    <!--配置view-controller,直接把请求地址和视图名称去关联起来，就不必写handler方法了-->
+    <!--
+        @RequestMapping("admin/to/login/page.html")
+        public String LoginPage(){
+            return "admin-login"
+        }
+    -->
+    <!--Admin-->
+    <mvc:view-controller path="/admin/to/login/page.html" view-name="admin-login"/>
+
+    <mvc:view-controller path="/admin/to/main/page.html" view-name="admin-main"></mvc:view-controller>
+
+    <mvc:view-controller path="/admin/to/add.html" view-name="admin-add"></mvc:view-controller>
+
+    <!--role-->
+    <mvc:view-controller path="/role/to/page.html" view-name="role-page"></mvc:view-controller>
+
+    <!--menu-->
+    <mvc:view-controller path="/menu/to/page.html" view-name="menu-page"></mvc:view-controller>
+
+
+    <!--注册拦截器-->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <!--配置要拦截的资源
+                /*对应一层路径
+                /**所有路径
+            -->
+            <mvc:mapping path="/**"/>
+            <!--不用拦截的资源-->
+            <mvc:exclude-mapping path="/admin/to/login/page.html"/>
+            <mvc:exclude-mapping path="/admin/do/login.html"/>
+            <!--配置拦截资源的类-->
+            <bean class="net.seehope.crowd.interceptor.LoginInterceptor"></bean>
+        </mvc:interceptor>
+    </mvc:interceptors>
+</beans>

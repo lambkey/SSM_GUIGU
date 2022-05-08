@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.alibaba.com/schema/stat"
+       xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/aop http://mybatis.org/schema/mybatis-spring.xsd">    <!--专门整合spring和mybatis-->
+
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+
+    <!--配置数据源-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="${jdbc.driverClass}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="username" value="${jdbc.user}"/>
+    </bean>
+
+
+    <!--spring容器整合mybatis容器中的所有属性放在spring的bean容器中 相当于mybatisConfig文件-->
+    <bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+
+        <!--把spring中的数据源源装入SqlSessionFactoryBean-->
+        <property name="dataSource" ref="dataSource"></property>
+
+        <!--指定mybatis核心(全局)配置文件的位置核心-->
+        <property name="configLocation" value="classpath:mybatis-config.xml"></property>
+
+        <!--指定Mapper.xml文件sql-->
+        <property name="mapperLocations" value="classpath:mybatis/mapper/*.xml"></property>
+
+        <!--配置插件,分页-->
+        <property name="plugins">
+            <array>
+                <!--配置PageHelper插件-->
+                <bean  class="com.github.pagehelper.PageHelper">
+                    <property name="properties">
+                        <props>
+                            <!--配置数据库方言,告诉PageHelper当前使用的数据库-->
+                            <prop key="dialect">mysql</prop>
+                            <!--配置页码的合理化修正,在1~总页数之间修正页码-->
+                            <prop key="reasonable">true</prop>
+                        </props>
+                    </property>
+                </bean>
+            </array>
+        </property>
+    </bean>
+
+    <!--该标签是mybatis提供的一个注解扫描标签，通过自动扫描注解的机制，创建每个dao接口定义的bean 。-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="net.seehope.crowd.mapper"/>
+    </bean>
+
+
+</beans>
